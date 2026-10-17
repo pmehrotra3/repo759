@@ -20,13 +20,13 @@ int main(int argc, char* argv[]) {
     }
 
     // i) Create and fill the n x n matrices A and B
-    double* A = new double[n * n];
-    double* B = new double[n * n];
-    double* C = new double[n * n];
+    float* A = new float[n * n];
+    float* B = new float[n * n];
+    float* C = new float[n * n];
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 
     for (int i = 0; i < n * n; i++) {
         A[i] = dist(gen);

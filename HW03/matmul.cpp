@@ -1,11 +1,11 @@
 #include "matmul.h"
 #include "omp.h"
 
-void mmul(const double* A, const double* B, double* C, const unsigned int n){
+void mmul(const float* A, const float* B, float* C, const std::size_t n){
 
     #pragma omp parallel for
     for (size_t i = 0; i < n * n; i++) {
-        C[i] = 0.0;
+        C[i] = 0.0f;
     }
 
     #pragma omp parallel for

@@ -50,7 +50,7 @@ void merge(int* arr, const std::size_t mid, const std::size_t n){
     }
 }
 
-// Recursive merge sort on arr[0, n)
+// Recursive merge sort on arr[0, n); each half is sorted as a separate OpenMP task
 void recurse(int* arr, const std::size_t n, const std::size_t threshold){
 
     // small piece: sort serially (n < 2 also stops endless splitting when threshold is 1)
@@ -58,10 +58,19 @@ void recurse(int* arr, const std::size_t n, const std::size_t threshold){
         insertion_sort(arr, n);
     }
     else{
-        // split in half, sort each half, then merge them
+        // split in half, sort each half in parallel, then merge them
         std::size_t mid = n / 2;
-        recurse(arr, mid, threshold);               // left half  arr[0, mid)
-        recurse(arr + mid, n - mid, threshold);     // right half arr[mid, n)
+
+        // left half arr[0, mid), any free thread can take this task
+        #pragma omp task
+        recurse(arr, mid, threshold);
+
+        // right half arr[mid, n), any free thread can take this task
+        #pragma omp task
+        recurse(arr + mid, n - mid, threshold);
+
+        // wait until both halves are sorted before merging
+        #pragma omp taskwait
         merge(arr, mid, n);
     }
 }
@@ -69,5 +78,9 @@ void recurse(int* arr, const std::size_t n, const std::size_t threshold){
 // Sorts arr[0, n) in place in ascending order
 void msort(int* arr, const std::size_t n, const std::size_t threshold){
 
+    // create the team of threads once; a single thread starts the recursion
+    // and the other threads pick up the tasks it creates
+    #pragma omp parallel
+    #pragma omp single
     recurse(arr, n, threshold);
 }
